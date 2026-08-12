@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sticker-in | Convert Foto ke Sticker WhatsApp</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  :root{
+    --paper:#FFFDF6;
+    --ink:#16231F;
+    --teal:#0B4F45;
+    --teal-deep:#083730;
+    --lime:#D8FE5C;
+    --coral:#FF6A4D;
+    --line:#16231F;
+  }
+  html,body{background:var(--paper);}
+  body{font-family:'Poppins',sans-serif; color:var(--ink);}
+  .font-display{font-family:'Fredoka',sans-serif;}
+
+  .paper-grid{
+    background-image:
+      radial-gradient(circle, rgba(22,35,31,0.10) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  .diecut{
+    border:3px dashed var(--line);
+    border-radius: 28px;
+    position:relative;
+    background:var(--paper);
+  }
+  .diecut::before{
+    content:"";
+    position:absolute; inset:-3px;
+    border-radius:28px;
+    box-shadow: 6px 8px 0px 0px rgba(22,35,31,0.9);
+    z-index:-1;
+  }
+
+  .peel-corner{
+    position:absolute; top:-2px; right:-2px;
+    width:46px; height:46px;
+    background: var(--paper);
+    border-left:3px dashed var(--line);
+    border-bottom:3px dashed var(--line);
+    border-radius: 0 26px 0 26px;
+    box-shadow: -2px 2px 0px rgba(22,35,31,0.15);
+    transform: rotate(0deg);
+  }
+
+  .btn-press:active{ transform: translate(3px,4px); box-shadow: 2px 2px 0px rgba(22,35,31,0.9) !important; }
+
+  .scroll-tag{ font-family:'Fredoka',sans-serif; letter-spacing:0.02em; }
+
+  .dropzone.dragover{ background: rgba(216,254,92,0.35); }
+
+  .checker{
+    background-image:
+      linear-gradient(45deg, #e9e5d8 25%, transparent 25%),
+      linear-gradient(-45deg, #e9e5d8 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #e9e5d8 75%),
+      linear-gradient(-45deg, transparent 75%, #e9e5d8 75%);
+    background-size: 16px 16px;
+    background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+  }
+
+  ::selection{ background: var(--lime); color:var(--ink); }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body class="paper-grid min-h-screen">
+
+<!-- NAV -->
+<nav class="max-w-5xl mx-auto px-6 py-6 flex items-center justify-between">
+  <div class="flex items-center gap-2">
+    <div class="w-9 h-9 rounded-xl bg-[var(--teal)] flex items-center justify-center rotate-[-6deg] border-2 border-[var(--ink)]">
+      <span class="text-[var(--lime)] font-display font-700 text-lg">✂</span>
+    </div>
+    <span class="font-display font-600 text-xl">Sticker-in</span>
+  </div>
+  <span class="hidden sm:block text-sm text-[var(--ink)]/60">buat sticker WA dari foto lo, gratis & di browser aja</span>
+</nav>
+
+<!-- HERO -->
+<header class="max-w-5xl mx-auto px-6 pt-6 pb-16 text-center">
+  <span id="eyebrow" class="inline-block scroll-tag text-xs sm:text-sm bg-[var(--lime)] border-2 border-[var(--ink)] rounded-full px-4 py-1 mb-6 rotate-[-2deg]">jpg / png → sticker WA dalam sekali klik</span>
+  <h1 id="headline" class="font-display font-700 text-4xl sm:text-6xl leading-[1.05] max-w-3xl mx-auto">
+    Foto lo, gunting jadi <span class="relative inline-block text-[var(--teal)]">sticker
+      <svg class="absolute -bottom-1 left-0 w-full" height="10" viewBox="0 0 200 10" preserveAspectRatio="none"><path d="M0,5 Q50,0 100,5 T200,5" stroke="var(--coral)" stroke-width="4" fill="none" stroke-linecap="round"/></svg>
+    </span>, langsung siap kirim ke WhatsApp.
+  </h1>
+  <p class="mt-5 text-[var(--ink)]/70 max-w-xl mx-auto text-sm sm:text-base">
+    Jujur dulu ya cuy: nggak ada website yang bisa nyuntik sticker langsung ke folder favorite WA (itu emang dikunci sama WhatsApp). Tapi ini cara paling deket & paling cepet — proses di sini, terus sekali tap langsung nyampe di chat WA lo.
+  </p>
+</header>
+
+<!-- MAIN TOOL -->
+<main class="max-w-5xl mx-auto px-6 pb-24 grid md:grid-cols-2 gap-8 items-start">
+
+  <!-- LEFT: uploader -->
+  <section class="diecut p-6 sm:p-8" id="uploadCard">
+    <div class="peel-corner"></div>
+    <p class="scroll-tag text-xs mb-3 text-[var(--ink)]/50">STEP 01</p>
+    <h2 class="font-display font-600 text-2xl mb-4">Upload foto lo</h2>
+
+    <label id="dropzone" for="fileInput" class="dropzone block cursor-pointer border-2 border-[var(--ink)] border-dashed rounded-2xl p-8 text-center transition-colors">
+      <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp" class="hidden">
+      <div id="dropzoneContent">
+        <div class="text-4xl mb-2">🖼️</div>
+        <p class="font-medium">Tap buat pilih file, atau drag-drop ke sini</p>
+        <p class="text-xs text-[var(--ink)]/50 mt-1">JPG, PNG, atau WEBP</p>
+      </div>
+    </label>
+
+    <div id="cropOptions" class="mt-6 hidden">
+      <p class="scroll-tag text-xs mb-3 text-[var(--ink)]/50">STEP 02 — SESUAIKAN</p>
+      <label class="flex items-center justify-between text-sm mb-3">
+        <span>Padding putih (biar kayak sticker beneran)</span>
+        <input type="checkbox" id="paddingToggle" class="w-5 h-5 accent-[var(--teal)]">
+      </label>
+      <label class="block text-sm mb-2">Geser posisi crop</label>
+      <input type="range" id="cropSlider" min="0" max="100" value="50" class="w-full accent-[var(--teal)]">
+    </div>
+
+    <p id="fileError" class="hidden mt-3 text-sm text-[var(--coral)] font-medium"></p>
+  </section>
+
+  <!-- RIGHT: preview -->
+  <section class="diecut p-6 sm:p-8">
+    <div class="peel-corner"></div>
+    <p class="scroll-tag text-xs mb-3 text-[var(--ink)]/50">STEP 03</p>
+    <h2 class="font-display font-600 text-2xl mb-4">Hasil sticker</h2>
+
+    <div id="previewWrap" class="checker rounded-2xl border-2 border-[var(--ink)] aspect-square flex items-center justify-center overflow-hidden">
+      <p id="previewPlaceholder" class="text-[var(--ink)]/40 text-sm px-6 text-center">preview bakal muncul di sini abis lo upload foto</p>
+      <canvas id="canvas" width="512" height="512" class="hidden w-full h-full"></canvas>
+    </div>
+
+    <p id="sizeInfo" class="text-xs text-[var(--ink)]/50 mt-3 hidden"></p>
+
+    <div class="mt-5 flex flex-col gap-3">
+      <button id="shareBtn" disabled class="btn-press disabled:opacity-40 disabled:cursor-not-allowed w-full font-display font-600 text-lg bg-[var(--teal)] text-white border-2 border-[var(--ink)] rounded-2xl py-3 shadow-[6px_6px_0px_0px_rgba(22,35,31,0.9)] transition-all">
+        📲 Kirim langsung ke WhatsApp
+      </button>
+      <button id="downloadBtn" disabled class="btn-press disabled:opacity-40 disabled:cursor-not-allowed w-full font-display font-600 text-lg bg-[var(--lime)] border-2 border-[var(--ink)] rounded-2xl py-3 shadow-[6px_6px_0px_0px_rgba(22,35,31,0.9)] transition-all">
+        ⬇️ Download sticker (.webp)
+      </button>
+    </div>
+  </section>
+
+</main>
+
+<!-- HOW IT ACTUALLY WORKS -->
+<section class="max-w-5xl mx-auto px-6 pb-24">
+  <div class="diecut p-6 sm:p-10">
+    <div class="peel-corner"></div>
+    <h3 class="font-display font-600 text-2xl mb-2">Biar nyampe ke "favorite" WA, ini 2 langkah terakhir</h3>
+    <p class="text-sm text-[var(--ink)]/60 mb-6">setelah tombol "Kirim langsung ke WhatsApp" ngebuka share sheet HP lo</p>
+    <div class="grid sm:grid-cols-2 gap-4">
+      <div class="bg-[var(--paper)] border-2 border-[var(--ink)] rounded-2xl p-5">
+        <p class="font-display font-600 mb-1 text-[var(--teal)]">1. Pilih chat & kirim</p>
+        <p class="text-sm text-[var(--ink)]/70">Pilih chat mana aja (boleh kirim ke diri sendiri), lalu kirim gambarnya seperti biasa.</p>
+      </div>
+      <div class="bg-[var(--paper)] border-2 border-[var(--ink)] rounded-2xl p-5">
+        <p class="font-display font-600 mb-1 text-[var(--teal)]">2. Tap ikon gunting/sticker</p>
+        <p class="text-sm text-[var(--ink)]/70">Sebelum kirim, WA nampilin ikon sticker di preview foto. Tap itu → otomatis masuk ke tab sticker "Recent" WA lo.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="max-w-5xl mx-auto px-6 pb-10 text-center text-xs text-[var(--ink)]/40">
+  Semua proses gambar jalan di browser lo — nggak ada yang diupload ke server manapun.
+</footer>
+
+<script>
+gsap.from("#eyebrow", {y:-10, opacity:0, duration:.5, ease:"back.out(2)"});
+gsap.from("#headline", {y:16, opacity:0, duration:.6, delay:.1, ease:"power2.out"});
+gsap.from("#uploadCard", {y:20, opacity:0, duration:.6, delay:.2, ease:"power2.out"});
+
+const fileInput = document.getElementById('fileInput');
+const dropzone = document.getElementById('dropzone');
+const dropzoneContent = document.getElementById('dropzoneContent');
+const cropOptions = document.getElementById('cropOptions');
+const paddingToggle = document.getElementById('paddingToggle');
+const cropSlider = document.getElementById('cropSlider');
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const previewPlaceholder = document.getElementById('previewPlaceholder');
+const shareBtn = document.getElementById('shareBtn');
+const downloadBtn = document.getElementById('downloadBtn');
+const fileError = document.getElementById('fileError');
+const sizeInfo = document.getElementById('sizeInfo');
+
+const SIZE = 512;
+let currentImg = null;
+let currentBlob = null;
+
+function showError(msg){
+  fileError.textContent = msg;
+  fileError.classList.remove('hidden');
+}
+function clearError(){
+  fileError.classList.add('hidden');
+}
+
+['dragover','dragenter'].forEach(evt=>{
+  dropzone.addEventListener(evt, e=>{ e.preventDefault(); dropzone.classList.add('dragover'); });
+});
+['dragleave','drop'].forEach(evt=>{
+  dropzone.addEventListener(evt, e=>{ e.preventDefault(); dropzone.classList.remove('dragover'); });
+});
+dropzone.addEventListener('drop', e=>{
+  const f = e.dataTransfer.files[0];
+  if(f) handleFile(f);
+});
+fileInput.addEventListener('change', e=>{
+  const f = e.target.files[0];
+  if(f) handleFile(f);
+});
+
+function handleFile(file){
+  clearError();
+  if(!['image/jpeg','image/png','image/webp'].includes(file.type)){
+    showError('Format belum kedukung. Pake JPG, PNG, atau WEBP ya.');
+    return;
+  }
+  if(file.size > 15*1024*1024){
+    showError('Filenya kegedean (max 15MB). Coba compress dulu.');
+    return;
+  }
+  const img = new Image();
+  img.onload = ()=>{
+    currentImg = img;
+    dropzoneContent.innerHTML = `<div class="text-3xl mb-1">✅</div><p class="font-medium truncate">${file.name}</p><p class="text-xs text-[var(--ink)]/50 mt-1">Tap buat ganti foto</p>`;
+    cropOptions.classList.remove('hidden');
+    render();
+  };
+  img.onerror = ()=> showError('Gagal buka gambarnya, coba file lain ya.');
+  img.src = URL.createObjectURL(file);
+}
+
+function render(){
+  if(!currentImg) return;
+
+  canvas.classList.remove('hidden');
+  previewPlaceholder.classList.add('hidden');
+
+  ctx.clearRect(0,0,SIZE,SIZE);
+
+  const usePadding = paddingToggle.checked;
+  const padding = usePadding ? Math.round(SIZE*0.08) : 0;
+  const drawSize = SIZE - padding*2;
+
+  const iw = currentImg.naturalWidth, ih = currentImg.naturalHeight;
+  const scale = Math.max(drawSize/iw, drawSize/ih);
+  const sw = drawSize/scale, sh = drawSize/scale;
+
+  const maxOffX = Math.max(0, iw - sw);
+  const maxOffY = Math.max(0, ih - sh);
+  const t = cropSlider.value/100;
+
+  let sx, sy;
+  if(maxOffX > maxOffY){
+    sx = maxOffX * t; sy = maxOffY/2;
+  } else {
+    sy = maxOffY * t; sx = maxOffX/2;
+  }
+
+  if(usePadding){
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.roundRect(0,0,SIZE,SIZE,48);
+    ctx.fill();
+  }
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.roundRect(padding, padding, drawSize, drawSize, usePadding? 32 : 0);
+  ctx.clip();
+  ctx.drawImage(currentImg, sx, sy, sw, sh, padding, padding, drawSize, drawSize);
+  ctx.restore();
+
+  exportBlob();
+}
+
+function exportBlob(){
+  compress(0.92);
+}
+
+function compress(quality){
+  canvas.toBlob(blob=>{
+    if(!blob) return;
+    if(blob.size > 100*1024 && quality > 0.4){
+      compress(quality - 0.1);
+      return;
+    }
+    currentBlob = blob;
+    shareBtn.disabled = false;
+    downloadBtn.disabled = false;
+    sizeInfo.textContent = `512×512 · ${(blob.size/1024).toFixed(0)}KB · WebP`;
+    sizeInfo.classList.remove('hidden');
+  }, 'image/webp', quality);
+}
+
+paddingToggle.addEventListener('change', render);
+cropSlider.addEventListener('input', render);
+
+downloadBtn.addEventListener('click', ()=>{
+  if(!currentBlob) return;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(currentBlob);
+  a.download = 'sticker.webp';
+  a.click();
+});
+
+shareBtn.addEventListener('click', async ()=>{
+  if(!currentBlob) return;
+  const file = new File([currentBlob], 'sticker.webp', {type:'image/webp'});
+
+  if(navigator.canShare && navigator.canShare({files:[file]})){
+    try{
+      await navigator.share({
+        files:[file],
+        title:'Sticker WA',
+        text:'Sticker dari Sticker-in ✂️'
+      });
+    }catch(err){
+      // user cancel share, no-op
+    }
+  } else {
+    downloadBtn.click();
+    showError('HP/browser lo belum dukung share langsung. Sticker udah kedownload, tinggal kirim manual via WhatsApp ya.');
+  }
+});
+</script>
+
+</body>
+</html>
